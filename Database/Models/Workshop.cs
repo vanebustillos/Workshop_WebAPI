@@ -1,8 +1,8 @@
- using System;
+using System;
 
-namespace workshop_web_api.Database.Models
+namespace workshop_web_api.Database
 {
- public class Campaign
+ public class Workshop
     {
         public string Id { get; set; }
         public string Name { get; set; }
