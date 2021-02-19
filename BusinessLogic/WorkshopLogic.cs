@@ -5,7 +5,7 @@ using workshop_web_api.Database;
 
 namespace workshop_web_api.BusinessLogic
 {
-    public class WorkshopLogic
+    public class WorkshopLogic : IWorkshopLogic
     {
         private IWorkshopTableDB _workshopDB; // DB of Workshop
         public List<Workshop> allWorkshop; //Data of DB

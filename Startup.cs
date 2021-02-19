@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using workshop_web_api.Database;
+using workshop_web_api.BusinessLogic;
 
 namespace workshop_web_api
 {
@@ -26,6 +28,9 @@ namespace workshop_web_api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddSingleton<IWorkshopTableDB, WorkshopTableDB>();
+            services.AddTransient<IWorkshopLogic, WorkshopLogic>();
 
             //Imports SWAGGER
             services.AddSwaggerGen(c =>
