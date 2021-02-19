@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using workshop_web_api.BusinessLogic;
 using workshop_web_api.Database;
 
@@ -24,6 +25,30 @@ namespace workshop_web_api.BusinessLogic
                 workshopList.Add(ConvDBtoDTO(workshop));
             }
             return workshopList;
+        }
+
+        public WorkshopDTO Post(WorkshopDTO workshop)
+        {
+            UpdateLocalDB();
+            Workshop input = ConvDTOtoDB(workshop);
+            input.Id = GenerateId(input);
+            _workshopDB.Create(input);
+            return workshop;
+        }
+
+        private string GenerateId(Workshop input)
+        {
+            if (allWorkshop.Count == 0)
+            {
+                return "Workshop-1";
+            }
+            else
+            {
+                Workshop lastWorkshop = allWorkshop.Last();
+                string[] fracment = lastWorkshop.Id.Split("-");
+                int lastId = Int32.Parse(fracment[1]) + 1;
+                return "Workshop-" + lastId;
+            }
         }
 
         public void UpdateLocalDB() //Updates the local list of elements used for the operations

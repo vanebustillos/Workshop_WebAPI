@@ -26,5 +26,19 @@ namespace workshop_web_api.Controllers
         {
             return _workshopLogic.Get();
         }
+
+        // POST: api/workshops
+        [HttpPost]
+        [Route("workshops")]
+        public WorkshopDTO Post([FromBody] WorkshopDTO workshop)
+        {
+            Console.WriteLine("from post => " + workshop.Id + " - " + workshop.Name + " - " + workshop.Status);
+            _workshopLogic.Post(workshop);
+
+            var dbServer = _configuration.GetSection("Database").GetSection("ServerName");
+            workshop.Name = $"{workshop.Name} data from {dbServer.Value}";
+            
+            return workshop;
+        }
     }
 }

@@ -7,5 +7,6 @@ namespace workshop_web_api.BusinessLogic
     public interface IWorkshopLogic
     {
         public List<WorkshopDTO> Get();
+        public WorkshopDTO Post(WorkshopDTO workshop);
     }
 }
