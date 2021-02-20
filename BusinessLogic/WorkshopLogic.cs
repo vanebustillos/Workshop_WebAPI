@@ -36,6 +36,38 @@ namespace workshop_web_api.BusinessLogic
             return workshop;
         }
 
+        public void Put(WorkshopDTO workshopToUpdate, string id)
+        {
+            UpdateLocalDB();
+
+            foreach (Workshop workshop in allWorkshop)
+            {
+                if (workshop.Id == id)
+                {   
+                    workshop.Name = workshopToUpdate.Name;
+                    workshop.Status = workshopToUpdate.Status;
+                    
+                    Workshop input = ConvDTOtoDB(workshopToUpdate);
+                    _workshopDB.Update(input);
+                    break;
+                } 
+            }
+        }
+
+        public void Delete(string id)
+        {
+            UpdateLocalDB();
+            foreach (Workshop workshop in allWorkshop)
+            {
+                if (workshop.Id == id)
+                {
+                    _workshopDB.Delete(workshop);
+                    allWorkshop.Remove(workshop);
+                    break;
+                }
+            }
+        }
+
         private string GenerateId(Workshop input)
         {
             if (allWorkshop.Count == 0)
@@ -59,7 +91,7 @@ namespace workshop_web_api.BusinessLogic
         public Workshop ConvDTOtoDB(WorkshopDTO oldWorkshop) //Converts a DTOWorkshop to a DB Workshop
         {
             Workshop validWorkshop = new Workshop();
-            if (oldWorkshop.Id != "Workshop-0"){
+            if (!oldWorkshop.Id.Equals("Workshop-0")){
                 validWorkshop.Id = oldWorkshop.Id;
             }
             validWorkshop.Name = oldWorkshop.Name;

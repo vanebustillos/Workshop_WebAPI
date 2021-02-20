@@ -26,28 +26,28 @@ namespace workshop_web_api.Database
             return DataBase;
         }
 
-        public Workshop Create(Workshop Workshop) // Creates a New Workshop 
+        public Workshop Create(Workshop newWorkshop) // Creates a New Workshop 
         {
-            DataBase.Add(Workshop);
-            return Workshop;
+            DataBase.Add(newWorkshop);
+            return newWorkshop;
         }
 
-        public void Update(Workshop Workshop) //Updates all fields in a Workshop except its id
+        public void Update(Workshop updatedWorkshop) //Updates all fields in a Workshop except its id
         {
             foreach (Workshop workshop in DataBase)
             {
-                if (workshop.Id == Workshop.Id)
+                if (workshop.Id == updatedWorkshop.Id)
                 {
-                    workshop.Name = Workshop.Name;
-                    workshop.Status = Workshop.Status;
+                    workshop.Name = updatedWorkshop.Name;
+                    workshop.Status = updatedWorkshop.Status;
                     break;
                 }
             }
         }
 
-        public void Delete(Workshop Workshop) //Removes a Workshop
+        public void Delete(Workshop workshop) //Removes a Workshop
         {
-            DataBase.Remove(Workshop);
+            DataBase.Remove(workshop);
         }
     }
 }

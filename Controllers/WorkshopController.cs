@@ -32,13 +32,28 @@ namespace workshop_web_api.Controllers
         [Route("workshops")]
         public WorkshopDTO Post([FromBody] WorkshopDTO workshop)
         {
-            Console.WriteLine("from post => " + workshop.Id + " - " + workshop.Name + " - " + workshop.Status);
             _workshopLogic.Post(workshop);
 
             var dbServer = _configuration.GetSection("Database").GetSection("ServerName");
             workshop.Name = $"{workshop.Name} data from {dbServer.Value}";
-            
+
             return workshop;
+        }
+
+        // PUT: api/workshops/Workshop-4
+        [HttpPut]
+        [Route("workshops/{id}")]
+        public void Put([FromBody]WorkshopDTO workshop, string id)
+        {
+            _workshopLogic.Put(workshop, id);
+        }
+
+        // DELETE: api/workshops/Workshop-4
+        [HttpDelete]
+         [Route("workshops/{id}")]
+        public void Delete(string id)
+        {
+             _workshopLogic.Delete(id);
         }
     }
 }
