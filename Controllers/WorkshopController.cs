@@ -10,7 +10,7 @@ namespace workshop_web_api.Controllers
     [ApiController]
     public class WorkshopController : ControllerBase
     {
-        private IWorkshopLogic _workshopLogic; //To be added
+        private IWorkshopLogic _workshopLogic;
         private IConfiguration _configuration;
 
         public WorkshopController(IWorkshopLogic workshopLogic, IConfiguration configuration)

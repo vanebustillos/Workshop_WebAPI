@@ -30,10 +30,16 @@ namespace workshop_web_api.BusinessLogic
         public WorkshopDTO Post(WorkshopDTO workshop)
         {
             UpdateLocalDB();
-            Workshop input = ConvDTOtoDB(workshop);
-            input.Id = GenerateId(input);
-            _workshopDB.Create(input);
-            return workshop;
+            
+            if(ValidateInput(workshop)){
+                Workshop input = ConvDTOtoDB(workshop);
+                input.Id = GenerateId(input);
+                _workshopDB.Create(input);  
+                return workshop;
+            }
+            else {
+                return null;
+            }
         }
 
         public void Put(WorkshopDTO workshopToUpdate, string id)
@@ -43,13 +49,15 @@ namespace workshop_web_api.BusinessLogic
             foreach (Workshop workshop in allWorkshop)
             {
                 if (workshop.Id == id)
-                {   
-                    workshop.Name = workshopToUpdate.Name;
-                    workshop.Status = workshopToUpdate.Status;
-                    
-                    Workshop input = ConvDTOtoDB(workshopToUpdate);
-                    _workshopDB.Update(input);
-                    break;
+                {  
+                    if(ValidateInput(workshopToUpdate)){
+                        workshop.Name = workshopToUpdate.Name;
+                        workshop.Status = workshopToUpdate.Status;
+                        
+                        Workshop input = ConvDTOtoDB(workshopToUpdate);
+                        _workshopDB.Update(input);
+                        break;
+                    }
                 } 
             }
         }
@@ -115,7 +123,7 @@ namespace workshop_web_api.BusinessLogic
             }
         }
 
-        public void UpdateLocalDB() //Updates the local list of elements used for the operations
+        public void UpdateLocalDB()
         {
             allWorkshop= _workshopDB.GetAll();
         }
@@ -139,6 +147,18 @@ namespace workshop_web_api.BusinessLogic
             validWorkshop.Name = oldWorkshop.Name;
             validWorkshop.Status = oldWorkshop.Status;
             return validWorkshop;
+        }
+
+        public bool ValidateInput(WorkshopDTO workshop){
+            if (workshop.Name == null || workshop.Name == "")
+            {
+                return false;
+            }
+            if (workshop.Status == null || workshop.Status == "")
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
