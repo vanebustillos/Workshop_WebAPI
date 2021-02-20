@@ -21,18 +21,18 @@ namespace workshop_web_api.Database
                     new Workshop() { Id = "Workshop-11",Name = "Calidad en Software Comercial", Status = "Scheduled"}
             };
 
-        public List<Workshop> GetAll() //Returns all Workshops
+        public List<Workshop> GetAll()
         {
             return DataBase;
         }
 
-        public Workshop Create(Workshop newWorkshop) // Creates a New Workshop 
+        public Workshop Create(Workshop newWorkshop)
         {
             DataBase.Add(newWorkshop);
             return newWorkshop;
         }
 
-        public void Update(Workshop updatedWorkshop) //Updates all fields in a Workshop except its id
+        public void Update(Workshop updatedWorkshop)
         {
             foreach (Workshop workshop in DataBase)
             {
@@ -45,7 +45,7 @@ namespace workshop_web_api.Database
             }
         }
 
-        public void Delete(Workshop workshop) //Removes a Workshop
+        public void Delete(Workshop workshop)
         {
             DataBase.Remove(workshop);
         }

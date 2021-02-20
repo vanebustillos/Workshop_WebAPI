@@ -8,8 +8,8 @@ namespace workshop_web_api.BusinessLogic
 {
     public class WorkshopLogic : IWorkshopLogic
     {
-        private IWorkshopTableDB _workshopDB; // DB of Workshop
-        public List<Workshop> allWorkshop; //Data of DB
+        private IWorkshopTableDB _workshopDB;
+        public List<Workshop> allWorkshop;
 
         public WorkshopLogic(IWorkshopTableDB workshopDB)
         {
