@@ -55,5 +55,19 @@ namespace workshop_web_api.Controllers
         {
              _workshopLogic.Delete(id);
         }
+
+        [HttpPost]
+        [Route("workshops/{id}/cancell")]
+        public void Cancell(string id)
+        {
+            _workshopLogic.CancellWorkshop(id);
+        }
+
+        [HttpPost]
+        [Route("workshops/{id}/postpone")]
+        public void Postpone(string id)
+        {
+            _workshopLogic.PostponeWorkshop(id);
+        }
     }
 }

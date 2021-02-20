@@ -53,7 +53,6 @@ namespace workshop_web_api.BusinessLogic
                 } 
             }
         }
-
         public void Delete(string id)
         {
             UpdateLocalDB();
@@ -64,6 +63,39 @@ namespace workshop_web_api.BusinessLogic
                     _workshopDB.Delete(workshop);
                     allWorkshop.Remove(workshop);
                     break;
+                }
+            }
+        }
+
+        public void CancellWorkshop(string id)
+        {
+            UpdateLocalDB();
+            foreach (Workshop workshop in allWorkshop)
+            {
+                if (workshop.Id == id)
+                {
+                    if (!workshop.Status.Equals("Cancelled"))
+                    {
+                        workshop.Status = "Cancelled";
+                         _workshopDB.Update(workshop);
+                        break;
+                    }
+                }
+            }
+        }
+        public void PostponeWorkshop(string id)
+        {
+            UpdateLocalDB();
+            foreach (Workshop workshop in allWorkshop)
+            {
+                if (workshop.Id == id)
+                {
+                    if (!workshop.Status.Equals("Postponed"))
+                    {
+                        workshop.Status = "Postponed";
+                         _workshopDB.Update(workshop);
+                        break;
+                    }
                 }
             }
         }

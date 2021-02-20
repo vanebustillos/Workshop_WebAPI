@@ -10,5 +10,7 @@ namespace workshop_web_api.BusinessLogic
         public WorkshopDTO Post(WorkshopDTO workshop);
         public void Put(WorkshopDTO workshopToUpdate, string id);
         public void Delete(string id);
+        public void CancellWorkshop(string id);
+        public void PostponeWorkshop(string id);
     }
 }
