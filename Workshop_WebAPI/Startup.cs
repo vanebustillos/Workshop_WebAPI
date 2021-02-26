@@ -49,6 +49,7 @@ namespace workshop_web_api
             {
                 app.UseDeveloperExceptionPage();
             }
+            //app.UseExceptionHandler();
 
             app.UseHttpsRedirection();
 

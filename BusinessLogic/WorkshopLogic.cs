@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BusinessLogic.Exceptions;
 using Database;
+using Database.Exceptions;
 
 namespace BusinessLogic
 {
@@ -10,7 +12,7 @@ namespace BusinessLogic
         private IWorkshopTableDB _workshopDB;
         private List<Workshop> allWorkshop;
         private const string _unvalidInitialWorkshop = "Workshop-0";
-        private const string _workshopIdPrefix = "Workshop";
+        private const string _workshopIdPrefix = "Workshop-";
         private const string _firstWorkshop = "Workshop-1";
         private const string _postponed = "Postponed";
         private const string _cancelled = "Cancelled";
@@ -21,8 +23,15 @@ namespace BusinessLogic
             allWorkshop = _workshopDB.GetAll();
         }
 
-        public List<WorkshopDTO> Get() { 
+        public List<WorkshopDTO> Get() 
+        { 
             UpdateLocalDB();
+
+            if(allWorkshop?.Any() != true)
+            {
+                throw new EmptyDatabaseException("Tha database is empty.");
+            }
+
             List<WorkshopDTO> workshopList = new List<WorkshopDTO>();
             foreach (Workshop workshop in allWorkshop)
             {
@@ -33,22 +42,41 @@ namespace BusinessLogic
 
         public WorkshopDTO Post(WorkshopDTO workshop)
         {
-            WorkshopDTO addedWorkshop = new WorkshopDTO();
-
-            UpdateLocalDB();
-            
-            if(ValidateInput(workshop)){
-                Workshop input = ConvDTOtoDB(workshop);
-                input.Id = GenerateId();
-                _workshopDB.Create(input);
-                addedWorkshop =  workshop;
+            if (!ValidateStringInput(workshop.Name))
+            {
+                throw new InvalidWorkshopNameException(404, "The input name is empty or null");
             }
 
-            return addedWorkshop;
+            if (!ValidateStringInput(workshop.Status))
+            {
+                throw new InvalidWorkshopStatusException(404, "The input status is empty or null");
+            }
+
+            UpdateLocalDB();
+       
+            Workshop input = ConvDTOtoDB(workshop);
+            input.Id = GenerateId();
+            _workshopDB.Create(input);
+            return  workshop;
         }
 
         public WorkshopDTO Put(WorkshopDTO workshopToUpdate, string workshopId)
         {
+            if (!MatchedId(workshopId))
+            {
+                throw new WorkshopNotFoundException(400, "There isn't any workshop matched.");
+            }
+
+            if (!ValidateStringInput(workshopToUpdate.Name))
+            {
+                throw new InvalidWorkshopNameException(404, "The input name is empty or null");
+            }
+
+            if (!ValidateStringInput(workshopToUpdate.Status))
+            {
+                throw new InvalidWorkshopStatusException(404, "The input status is empty or null");
+            }
+
             WorkshopDTO updatedWorkshop = new WorkshopDTO();
             Workshop updatedWorkshopDB = new Workshop();
 
@@ -71,6 +99,11 @@ namespace BusinessLogic
         }
         public WorkshopDTO Delete(string workshopId)
         {
+            if (!MatchedId(workshopId))
+            {
+                throw new WorkshopNotFoundException(400, "There isn't any workshop matched.");
+            }
+
             WorkshopDTO deletedWorkshop = new WorkshopDTO();
             Workshop deletedFromDB = new Workshop();
 
@@ -89,6 +122,11 @@ namespace BusinessLogic
 
         public WorkshopDTO Cancel(string workshopId)
         {
+            if (!MatchedId(workshopId))
+            {
+                throw new WorkshopNotFoundException(400, "There isn't any workshop matched.");
+            }
+
             WorkshopDTO cancelledWorkshop = new WorkshopDTO();
             Workshop updatedWorkshop = new Workshop();
 
@@ -107,6 +145,11 @@ namespace BusinessLogic
 
         public WorkshopDTO Postpone(string workshopId)
         {
+            if (!MatchedId(workshopId))
+            {
+                throw new WorkshopNotFoundException(400, "There isn't any workshop matched.");
+            }
+
             WorkshopDTO posponedWorkshop = new WorkshopDTO();
             Workshop updatedWorkshop = new Workshop();
 
@@ -172,16 +215,34 @@ namespace BusinessLogic
             return validWorkshop;
         }
 
-        private bool ValidateInput(WorkshopDTO workshop)
+        private bool ValidateStringInput(string input)
         {
             bool isValid = false;
 
-            if (!string.IsNullOrEmpty(workshop.Name) && !string.IsNullOrEmpty(workshop.Status))
+            if (!string.IsNullOrEmpty(input))
             {
                 isValid = true;
             }
 
             return isValid;
+        }
+        private bool MatchedId(string id)
+        {
+            bool matchExists = false;
+
+            if (!ValidateStringInput(id))
+            {
+                throw new InvalidWorkshopNameException(404, "The input ID is empty or null");
+            }
+
+            allWorkshop.Where(workshop => workshop.Id.Equals(id))
+                 .Select(workshop => {
+                     matchExists = true;
+                     return workshop;
+                 })
+                 .ToList();
+
+            return matchExists;
         }
     }
 }
