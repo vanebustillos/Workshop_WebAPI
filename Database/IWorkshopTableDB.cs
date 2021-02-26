@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
-using workshop_web_api.Database;
 
-namespace workshop_web_api.Database
+namespace Database
 {
     public interface IWorkshopTableDB
     {
-        Workshop Create(Workshop Workshop);
-        void Delete(Workshop Workshop);
+        Workshop Create(Workshop workshop);
+        Workshop Delete(Workshop workshop);
         List<Workshop> GetAll();
-        void Update(Workshop Workshop);
+        Workshop Update(Workshop workshop);
     }
 }

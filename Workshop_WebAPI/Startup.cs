@@ -10,8 +10,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using workshop_web_api.Database;
-using workshop_web_api.BusinessLogic;
+using Middleware;
+using BusinessLogic;
+using Database;
 
 namespace workshop_web_api
 {
@@ -49,6 +50,7 @@ namespace workshop_web_api
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseExceptionHandlerMiddleware();
 
             app.UseHttpsRedirection();
 

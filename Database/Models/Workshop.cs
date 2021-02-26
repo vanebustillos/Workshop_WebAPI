@@ -1,6 +1,6 @@
 using System;
 
-namespace workshop_web_api.Database
+namespace Database
 {
  public class Workshop
     {

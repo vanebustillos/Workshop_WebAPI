@@ -1,15 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using workshop_web_api.BusinessLogic;
-using workshop_web_api.Database;
+using BusinessLogic.Exceptions;
+using Database;
+using Database.Exceptions;
 
-namespace workshop_web_api.BusinessLogic
+namespace BusinessLogic
 {
     public class WorkshopLogic : IWorkshopLogic
     {
         private IWorkshopTableDB _workshopDB;
-        public List<Workshop> allWorkshop;
+        private List<Workshop> allWorkshop;
+        private const string _unvalidInitialWorkshop = "Workshop-0";
+        private const string _workshopIdPrefix = "Workshop-";
+        private const string _firstWorkshop = "Workshop-1";
+        private const string _postponed = "Postponed";
+        private const string _cancelled = "Cancelled";
 
         public WorkshopLogic(IWorkshopTableDB workshopDB)
         {
@@ -17,8 +23,15 @@ namespace workshop_web_api.BusinessLogic
             allWorkshop = _workshopDB.GetAll();
         }
 
-        public List<WorkshopDTO> Get() { 
+        public List<WorkshopDTO> Get() 
+        { 
             UpdateLocalDB();
+
+            if(allWorkshop?.Any() != true)
+            {
+                throw new EmptyDatabaseException("Tha database is empty.");
+            }
+
             List<WorkshopDTO> workshopList = new List<WorkshopDTO>();
             foreach (Workshop workshop in allWorkshop)
             {
@@ -29,136 +42,207 @@ namespace workshop_web_api.BusinessLogic
 
         public WorkshopDTO Post(WorkshopDTO workshop)
         {
+            if (!ValidateStringInput(workshop.Name))
+            {
+                throw new InvalidWorkshopNameException(404, "The input name is empty or null");
+            }
+
+            if (!ValidateStringInput(workshop.Status))
+            {
+                throw new InvalidWorkshopStatusException(404, "The input status is empty or null");
+            }
+
             UpdateLocalDB();
-            
-            if(ValidateInput(workshop)){
-                Workshop input = ConvDTOtoDB(workshop);
-                input.Id = GenerateId(input);
-                _workshopDB.Create(input);  
-                return workshop;
-            }
-            else {
-                return null;
-            }
+       
+            Workshop input = ConvDTOtoDB(workshop);
+            input.Id = GenerateId();
+            _workshopDB.Create(input);
+            return  workshop;
         }
 
-        public void Put(WorkshopDTO workshopToUpdate, string id)
+        public WorkshopDTO Put(WorkshopDTO workshopToUpdate, string workshopId)
         {
+            if (!MatchedId(workshopId))
+            {
+                throw new WorkshopNotFoundException(400, "There isn't any workshop matched.");
+            }
+
+            if (!ValidateStringInput(workshopToUpdate.Name))
+            {
+                throw new InvalidWorkshopNameException(404, "The input name is empty or null");
+            }
+
+            if (!ValidateStringInput(workshopToUpdate.Status))
+            {
+                throw new InvalidWorkshopStatusException(404, "The input status is empty or null");
+            }
+
+            WorkshopDTO updatedWorkshop = new WorkshopDTO();
+            Workshop updatedWorkshopDB = new Workshop();
+
             UpdateLocalDB();
 
-            foreach (Workshop workshop in allWorkshop)
-            {
-                if (workshop.Id == id)
-                {  
-                    if(ValidateInput(workshopToUpdate)){
-                        workshop.Name = workshopToUpdate.Name;
-                        workshop.Status = workshopToUpdate.Status;
-                        
-                        Workshop input = ConvDTOtoDB(workshopToUpdate);
-                        _workshopDB.Update(input);
-                        break;
-                    }
-                } 
-            }
+            allWorkshop.Where(workshop => workshop.Id.Equals(workshopId))
+              .Select(workshop => {
+                  workshop.Name = workshopToUpdate.Name;
+                  workshop.Status = workshopToUpdate.Status;
+
+                  updatedWorkshopDB = ConvDTOtoDB(workshopToUpdate);
+                  _workshopDB.Update(updatedWorkshopDB);
+                  updatedWorkshop = ConvDBtoDTO(updatedWorkshopDB);
+                  updatedWorkshop.Id = workshop.Id;
+                  return workshop;
+              })
+              .ToList();
+
+            return updatedWorkshop;
         }
-        public void Delete(string id)
+        public WorkshopDTO Delete(string workshopId)
         {
-            UpdateLocalDB();
-            foreach (Workshop workshop in allWorkshop)
+            if (!MatchedId(workshopId))
             {
-                if (workshop.Id == id)
-                {
-                    _workshopDB.Delete(workshop);
-                    allWorkshop.Remove(workshop);
-                    break;
-                }
+                throw new WorkshopNotFoundException(400, "There isn't any workshop matched.");
             }
+
+            WorkshopDTO deletedWorkshop = new WorkshopDTO();
+            Workshop deletedFromDB = new Workshop();
+
+            UpdateLocalDB();
+            allWorkshop.Where(workshop => workshop.Id.Equals(workshopId))
+              .Select(workshop => {
+                  deletedFromDB = _workshopDB.Delete(workshop);
+                  allWorkshop.Remove(workshop);
+                  deletedWorkshop = ConvDBtoDTO(deletedFromDB);
+                  return workshop;
+              })
+              .ToList();
+
+            return deletedWorkshop;
         }
 
-        public void CancellWorkshop(string id)
+        public WorkshopDTO Cancel(string workshopId)
         {
-            UpdateLocalDB();
-            foreach (Workshop workshop in allWorkshop)
+            if (!MatchedId(workshopId))
             {
-                if (workshop.Id == id)
-                {
-                    if (!workshop.Status.Equals("Cancelled"))
-                    {
-                        workshop.Status = "Cancelled";
-                         _workshopDB.Update(workshop);
-                        break;
-                    }
-                }
+                throw new WorkshopNotFoundException(400, "There isn't any workshop matched.");
             }
-        }
-        public void PostponeWorkshop(string id)
-        {
+
+            WorkshopDTO cancelledWorkshop = new WorkshopDTO();
+            Workshop updatedWorkshop = new Workshop();
+
             UpdateLocalDB();
-            foreach (Workshop workshop in allWorkshop)
-            {
-                if (workshop.Id == id)
-                {
-                    if (!workshop.Status.Equals("Postponed"))
-                    {
-                        workshop.Status = "Postponed";
-                         _workshopDB.Update(workshop);
-                        break;
-                    }
-                }
-            }
+            allWorkshop.Where(workshop => workshop.Id.Equals(workshopId))
+              .Select(workshop => {
+                  workshop.Status = _cancelled;
+                  updatedWorkshop = _workshopDB.Update(workshop);
+                  cancelledWorkshop = ConvDBtoDTO(updatedWorkshop);
+                  return workshop;
+              })
+              .ToList();
+   
+            return cancelledWorkshop;
         }
 
-        private string GenerateId(Workshop input)
+        public WorkshopDTO Postpone(string workshopId)
         {
+            if (!MatchedId(workshopId))
+            {
+                throw new WorkshopNotFoundException(400, "There isn't any workshop matched.");
+            }
+
+            WorkshopDTO posponedWorkshop = new WorkshopDTO();
+            Workshop updatedWorkshop = new Workshop();
+
+            UpdateLocalDB();
+
+            allWorkshop.Where(workshop => workshop.Id.Equals(workshopId))
+              .Select(workshop => {
+                  workshop.Status = _postponed;
+                  updatedWorkshop = _workshopDB.Update(workshop);
+                  posponedWorkshop = ConvDBtoDTO(updatedWorkshop);
+                  return workshop;
+              })
+              .ToList();
+
+            return posponedWorkshop;
+        }
+
+        private string GenerateId()
+        {
+            string id;
+
             if (allWorkshop.Count == 0)
             {
-                return "Workshop-1";
+                id = _firstWorkshop;
             }
             else
             {
                 Workshop lastWorkshop = allWorkshop.Last();
                 string[] fracment = lastWorkshop.Id.Split("-");
                 int lastId = Int32.Parse(fracment[1]) + 1;
-                return "Workshop-" + lastId;
+                id = $"{ _workshopIdPrefix }{ lastId }";
             }
+
+            return id;
         }
 
-        public void UpdateLocalDB()
+        private void UpdateLocalDB()
         {
             allWorkshop= _workshopDB.GetAll();
         }
 
-        public Workshop ConvDTOtoDB(WorkshopDTO oldWorkshop) //Converts a DTOWorkshop to a DB Workshop
+        private Workshop ConvDTOtoDB(WorkshopDTO oldWorkshop) //Converts a DTOWorkshop to a DB Workshop
         {
             Workshop validWorkshop = new Workshop();
-            if (!oldWorkshop.Id.Equals("Workshop-0")){
+            if (!oldWorkshop.Id.Equals(_unvalidInitialWorkshop)){
                 validWorkshop.Id = oldWorkshop.Id;
             }
             validWorkshop.Name = oldWorkshop.Name;
             validWorkshop.Status = oldWorkshop.Status;
+
             return validWorkshop;
         }
 
-        public WorkshopDTO ConvDBtoDTO(Workshop oldWorkshop) //Converts a DB Workshop to a DTOWorkshop
+        private WorkshopDTO ConvDBtoDTO(Workshop oldWorkshop) //Converts a DB Workshop to a DTOWorkshop
         {
-            WorkshopDTO validWorkshop = new WorkshopDTO();
-             
-            validWorkshop.Id = oldWorkshop.Id;
-            validWorkshop.Name = oldWorkshop.Name;
-            validWorkshop.Status = oldWorkshop.Status;
+            WorkshopDTO validWorkshop = new WorkshopDTO
+            {
+                Id = oldWorkshop.Id,
+                Name = oldWorkshop.Name,
+                Status = oldWorkshop.Status
+            };
+
             return validWorkshop;
         }
 
-        public bool ValidateInput(WorkshopDTO workshop){
-            if (workshop.Name == null || workshop.Name == "")
+        private bool ValidateStringInput(string input)
+        {
+            bool isValid = false;
+
+            if (!string.IsNullOrEmpty(input))
             {
-                return false;
+                isValid = true;
             }
-            if (workshop.Status == null || workshop.Status == "")
+
+            return isValid;
+        }
+        private bool MatchedId(string id)
+        {
+            bool matchExists = false;
+
+            if (!ValidateStringInput(id))
             {
-                return false;
+                throw new InvalidWorkshopNameException(404, "The input ID is empty or null");
             }
-            return true;
+
+            allWorkshop.Where(workshop => workshop.Id.Equals(id))
+                 .Select(workshop => {
+                     matchExists = true;
+                     return workshop;
+                 })
+                 .ToList();
+
+            return matchExists;
         }
     }
 }
