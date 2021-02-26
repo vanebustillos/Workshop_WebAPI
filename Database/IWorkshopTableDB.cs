@@ -5,9 +5,9 @@ namespace Database
 {
     public interface IWorkshopTableDB
     {
-        Workshop Create(Workshop Workshop);
-        void Delete(Workshop Workshop);
+        Workshop Create(Workshop workshop);
+        Workshop Delete(Workshop workshop);
         List<Workshop> GetAll();
-        void Update(Workshop Workshop);
+        Workshop Update(Workshop workshop);
     }
 }

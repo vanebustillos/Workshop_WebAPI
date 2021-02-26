@@ -6,7 +6,7 @@ using BusinessLogic;
 
 namespace workshop_web_api.Controllers
 {
-    [Route("api")]
+    [Route("api/workshops")]
     [ApiController]
     public class WorkshopController : ControllerBase
     {
@@ -19,55 +19,44 @@ namespace workshop_web_api.Controllers
             _configuration = configuration;
         }
 
-        // GET: api/workshops
         [HttpGet]
-        [Route("workshops")]
         public IEnumerable<WorkshopDTO> GetAll()
         {
             return _workshopLogic.Get();
         }
 
-        // POST: api/workshops
         [HttpPost]
-        [Route("workshops")]
         public WorkshopDTO Post([FromBody] WorkshopDTO workshop)
         {
-            _workshopLogic.Post(workshop);
-
-            var dbServer = _configuration.GetSection("Database").GetSection("ServerName");
-            workshop.Name = $"{workshop.Name} data from {dbServer.Value}";
-
-            return workshop;
+            return _workshopLogic.Post(workshop);
         }
 
-        // PUT: api/workshops/Workshop-4
         [HttpPut]
-        [Route("workshops/{id}")]
-        public void Put([FromBody]WorkshopDTO workshop, string id)
+        [Route("{workshopId}")]
+        public WorkshopDTO Put([FromBody]WorkshopDTO workshop, string id)
         {
-            _workshopLogic.Put(workshop, id);
+            return _workshopLogic.Put(workshop, id);
         }
 
-        // DELETE: api/workshops/Workshop-4
         [HttpDelete]
-         [Route("workshops/{id}")]
-        public void Delete(string id)
+         [Route("{workshopId}")]
+        public WorkshopDTO Delete(string id)
         {
-             _workshopLogic.Delete(id);
+             return _workshopLogic.Delete(id);
         }
 
         [HttpPost]
-        [Route("workshops/{id}/cancell")]
-        public void Cancell(string id)
+        [Route("{workshopId}/cancel")]
+        public WorkshopDTO Cancell(string id)
         {
-            _workshopLogic.CancellWorkshop(id);
+            return _workshopLogic.Cancel(id);
         }
 
         [HttpPost]
-        [Route("workshops/{id}/postpone")]
-        public void Postpone(string id)
+        [Route("{workshopId}/postpone")]
+        public WorkshopDTO Postpone(string id)
         {
-            _workshopLogic.PostponeWorkshop(id);
+            return _workshopLogic.Postpone(id);
         }
     }
 }

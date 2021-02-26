@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Database;
 
 namespace Database
 {
     public class WorkshopTableDB : IWorkshopTableDB
     {
-        List<Workshop> DataBase = new List<Workshop>
+        List<Workshop> _database = new List<Workshop>
             {
                     new Workshop() { Id = "Workshop-1",Name = "Introduccion Internal Apps", Status = "Done"},
                     new Workshop() { Id = "Workshop-2",Name = "OOP", Status = "Done"},
@@ -23,31 +24,32 @@ namespace Database
 
         public List<Workshop> GetAll()
         {
-            return DataBase;
+            return _database;
         }
 
         public Workshop Create(Workshop newWorkshop)
         {
-            DataBase.Add(newWorkshop);
+            _database.Add(newWorkshop);
             return newWorkshop;
         }
 
-        public void Update(Workshop updatedWorkshop)
+        public Workshop Update(Workshop workshopToUpdate)
         {
-            foreach (Workshop workshop in DataBase)
-            {
-                if (workshop.Id == updatedWorkshop.Id)
-                {
-                    workshop.Name = updatedWorkshop.Name;
-                    workshop.Status = updatedWorkshop.Status;
-                    break;
-                }
-            }
+            Workshop _updatedWorkshop = new Workshop();
+            _database.Where(w => w.Id.Equals(workshopToUpdate.Id))
+               .Select(w => { 
+                   w.Name = workshopToUpdate.Name; 
+                   w.Status = workshopToUpdate.Status; 
+                   _updatedWorkshop = w; 
+                   return w; })
+               .ToList();
+            return _updatedWorkshop;
         }
 
-        public void Delete(Workshop workshop)
+        public Workshop Delete(Workshop workshopToDelete)
         {
-            DataBase.Remove(workshop);
+            _database.Remove(workshopToDelete);
+            return workshopToDelete;
         }
     }
 }
