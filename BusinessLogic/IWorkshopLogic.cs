@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using workshop_web_api.BusinessLogic;
 
-namespace workshop_web_api.BusinessLogic
+namespace BusinessLogic
 {
     public interface IWorkshopLogic
     {

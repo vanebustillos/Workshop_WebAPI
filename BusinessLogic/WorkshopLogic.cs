@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using workshop_web_api.BusinessLogic;
-using workshop_web_api.Database;
+using Database;
 
-namespace workshop_web_api.BusinessLogic
+namespace BusinessLogic
 {
     public class WorkshopLogic : IWorkshopLogic
     {

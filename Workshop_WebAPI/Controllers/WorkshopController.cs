@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using workshop_web_api.BusinessLogic;
+using BusinessLogic;
 
 namespace workshop_web_api.Controllers
 {

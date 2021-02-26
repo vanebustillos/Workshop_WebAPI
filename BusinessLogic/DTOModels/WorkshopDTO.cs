@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace workshop_web_api.BusinessLogic
+namespace BusinessLogic
 {
 	public class WorkshopDTO
 	{

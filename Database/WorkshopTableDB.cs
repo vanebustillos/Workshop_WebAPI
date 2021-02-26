@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using workshop_web_api.Database;
+using Database;
 
-namespace workshop_web_api.Database
+namespace Database
 {
     public class WorkshopTableDB : IWorkshopTableDB
     {
